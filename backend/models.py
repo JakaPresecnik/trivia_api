@@ -76,3 +76,8 @@ class Category(db.Model):
       'id': self.id,
       'type': self.type
     }
+    
+  def formatDict(self):
+    return {
+      self.id: self.type
+    }
