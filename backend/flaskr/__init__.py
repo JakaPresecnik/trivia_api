@@ -14,6 +14,8 @@ def create_app(test_config=None):
   app = Flask(__name__)
   setup_db(app)
   
+  # helper function that takes the arguments of questions, categories and page,
+  # it formats them and limits the respond to QUESTIONS_PER_PAGE 
   def paginate_questions(req, categories, questions):
     page = req.args.get('page', 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
@@ -43,7 +45,7 @@ def create_app(test_config=None):
   @app.after_request
   def after_request(res):
     res.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    res.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
+    res.headers.add('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
     
     return res
 
@@ -82,8 +84,11 @@ def create_app(test_config=None):
   def get_questions():
     categories = Category.query.order_by(Category.id).all()
     questions = Question.query.order_by(Question.id).all()
-
+    # It uses the helper function paginate_questions
     paginated_results = paginate_questions(request, categories, questions)
+    
+    if len(paginated_results['paginated_questions']) == 0:
+      abort(404)
 
     return jsonify({
       "success": True,
@@ -132,7 +137,7 @@ def create_app(test_config=None):
     body = request.get_json()
     if not body:
       abort(422)
-    
+    # error handling on empty inputs
     new_question = body.get('question', None)
     if not new_question:
       abort(422)
@@ -147,7 +152,11 @@ def create_app(test_config=None):
       abort(422)
     
     try:
-      question = Question(question=new_question, answer=new_answer, difficulty=new_difficulty, category=new_category)
+      question = Question(
+        question=new_question, 
+        answer=new_answer, 
+        difficulty=new_difficulty, 
+        category=new_category)
       question.insert()
 
       return jsonify({'success': True})
@@ -166,24 +175,22 @@ def create_app(test_config=None):
   '''
   @app.route('/questions/search', methods=['POST'])
   def search_question():
-    page = request.args.get('page', 1, type=int)
-    start = (page - 1) * 10
-    end = start + 10
     body = request.get_json()
     search_term = body.get('searchTerm', None)
 
     try:
       questions = Question.query.filter(Question.question.ilike('%' + search_term + '%')).all()
-      if len(questions) == 0:
-        abort(404)
+      
+      if not questions:
+        abort(422)
 
       formatted_questions = [question.format() for question in questions]
      
       return jsonify({
         "success": True,
-        "questions": formatted_questions[start:end],
+        "questions": formatted_questions,
         "total_questions": len(formatted_questions)
-      })
+      }), 200
     except:
       abort(422)
 
@@ -204,8 +211,6 @@ def create_app(test_config=None):
       abort(404)
 
     questions = Question.query.filter(Question.category == category_id).all()
-    if len(questions) == 0:
-      abort(404)
       
     formatted_questions = [question.format() for question in questions]
     formatted_category = category.format()
@@ -234,16 +239,18 @@ def create_app(test_config=None):
     category = body['quiz_category']
     previous_questions = body['previous_questions']
     
-    # If/else to set the questions for desired category / or all categories, that ara unanswered
+    # If/else to set the questions for desired category 
+    # or all categories, that are unanswered
     if category['id'] == 0:
       questions = Question.query.filter(Question.id.notin_(previous_questions)).all()
     else:
-      questions = Question.query.filter(Question.category == category['id'], Question.id.notin_(previous_questions)).all()
+      questions = Question.query.filter(
+        Question.category == category['id'], 
+        Question.id.notin_(previous_questions)).all()
     
     # If there are no more unanswerd questions send this
     if len(questions) == 0:
       return jsonify({
-        "success": True,
         "status": "no more questions"
       })
 
