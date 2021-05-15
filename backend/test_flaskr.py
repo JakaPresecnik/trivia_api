@@ -7,8 +7,9 @@ from flaskr import create_app
 from models import setup_db, Question, Category
 
 # change this variable on each test
-delete_question_id = 6
-create_category_name = 'test'
+delete_question_id = 9
+delete_category_id = 3
+create_category_name = 'testing1'
 
 class TriviaTestCase(unittest.TestCase):
     """This class represents the trivia test case"""
@@ -27,7 +28,10 @@ class TriviaTestCase(unittest.TestCase):
             self.database_name)
         setup_db(self.app, self.database_path)
         
-        # variables used in testing routes
+        """ variables used in testing routes 
+            If the database is meddled with tests can fail!
+            NOTE: if you run multiple tests you need to update variables on top""" 
+
         self.new_category = {'category': create_category_name}
         self.science_category = {'category': 'Science'}
         self.new_question = {
@@ -91,6 +95,27 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Unprocessable')
 
+    # delete_category() tests
+    def test_delete_question(self):
+        res = self.client().delete('/category/' + str(delete_category_id))
+        data = json.loads(res.data)
+
+        category = Category.query.filter(
+            Category.id == delete_category_id).one_or_none()
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['category_id'], delete_category_id)
+        self.assertEqual(category, None)
+
+    def test_404_category_does_not_exist(self):
+        res = self.client().delete('category/1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Not found')
+
     # get_questions() tests:
     # receive questions success
     def test_get_questions(self):
@@ -103,13 +128,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(len(data['questions']))
         self.assertTrue(data['total_questions'] > 0)
         self.assertEqual(data['current_category'], 0)
-        self.new_question = {
-            'question': 'New question?',
-            'answer': 'Yes',
-            'difficulty': 5,
-            'category': 1
-        }
-        self.new_search = {'searchTerm': 'question'}
+
     # receive empty object
     def test_404_requesting_beyond_valid_page(self):
         res = self.client().get('/questions?page=1000')
@@ -220,10 +239,6 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['status'], 'no more questions')
-        
-    # internal_server_error(error) test
-    # not_found(error) test
-    # unprocassable(error) test
     
 # Make the tests conveniently executable
 if __name__ == "__main__":

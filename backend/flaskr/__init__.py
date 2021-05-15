@@ -97,6 +97,24 @@ def create_app(test_config=None):
     except:
       abort(422)
 
+  # Another route for deleting categories here, not implemented on frontend
+  @app.route('/categories/<int:category_id>', methods=['DELETE'])
+  def delete_category():
+    try:
+      category = Category.query.filter(Category.id == category_id).one_or_none()
+
+      if category is None:
+        abort(404)
+
+      category.delete()
+      
+      return jsonify({
+        "success": True,
+        "question_id": question_id
+      }), 200
+    except:
+      abort(422)
+
   '''
   DONE: 
   Create an endpoint to handle GET requests for questions, 
