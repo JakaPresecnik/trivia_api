@@ -67,6 +67,36 @@ def create_app(test_config=None):
       "categories": formatted_categories
     }), 200
 
+  # Added additional route that lets us create additional categories
+  # It is not implemented in frontend as I want the commit to have more python than js :D
+  @app.route('/categories', methods=['POST'])
+  def create_category():
+    body = request.get_json()
+    categories = Category.query.with_entities(Category.type).all()
+    categories_array = [type for (type, ) in categories]
+    
+    if not body:
+      abort(422)
+
+    new_category = body.get('category', None)
+
+    if new_category in categories_array:
+      abort(409)
+
+    if new_category is None:
+      abort(422)
+
+    try:
+      category = Category(type = new_category)
+    
+      category.insert()
+      return jsonify({
+        "success": True,
+        "category": new_category
+      }), 200
+    except:
+      abort(422)
+
   '''
   DONE: 
   Create an endpoint to handle GET requests for questions, 
@@ -290,6 +320,14 @@ def create_app(test_config=None):
       "error": 422,
       "message": "Unprocessable"
     }), 422
+
+  @app.errorhandler(409)
+  def unprocassable(error):
+    return jsonify({
+      "success": False, 
+      "error": 409,
+      "message": "Already exists"
+    }), 409
 
 
   return app

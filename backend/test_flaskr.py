@@ -7,7 +7,8 @@ from flaskr import create_app
 from models import setup_db, Question, Category
 
 # change this variable on each test
-delete_question_id = 4
+delete_question_id = 6
+create_category_name = 'test'
 
 class TriviaTestCase(unittest.TestCase):
     """This class represents the trivia test case"""
@@ -27,6 +28,8 @@ class TriviaTestCase(unittest.TestCase):
         setup_db(self.app, self.database_path)
         
         # variables used in testing routes
+        self.new_category = {'category': create_category_name}
+        self.science_category = {'category': 'Science'}
         self.new_question = {
             'question': 'New question?',
             'answer': 'Yes',
@@ -62,6 +65,31 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(len(data['categories']))
+    
+    # create_category() tests
+    def test_create_category(self):
+        res = self.client().post('/categories', json=self.new_category)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['category'], self.new_category['category'])
+
+    def test_409_category_already_exists(self):
+        res = self.client().post('/categories', json=self.science_category)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 409)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Already exists')
+    
+    def test_422_test_new_category_none(self):
+        res = self.client().post('/categories', json={})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Unprocessable')
 
     # get_questions() tests:
     # receive questions success
@@ -161,7 +189,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['total_questions'] > 0)
     # error not valid category
     def test_404_category_not_found(self):
-        res = self.client().get('/categories/7/questions')
+        res = self.client().get('/categories/1000/questions')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
