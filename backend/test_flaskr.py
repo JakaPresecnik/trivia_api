@@ -7,8 +7,8 @@ from flaskr import create_app
 from models import setup_db, Question, Category
 
 # change this variable on each test
-delete_question_id = 9
-delete_category_id = 3
+delete_question_id = 4
+delete_category_id = 2
 create_category_name = 'testing1'
 
 class TriviaTestCase(unittest.TestCase):
@@ -41,6 +41,13 @@ class TriviaTestCase(unittest.TestCase):
             'category': 1
         }
         self.new_search = {'searchTerm': 'question'}
+        self.question_to_update = 1
+        self.updated_question = {
+            'question': 'Updated question?',
+            'answer': 'Yes',
+            'difficulty': 5,
+            'category': 1
+        }
         self.unexistent_question_search = {'searchTerm': 'hdkerefdsgsd'}
         self.test_previous_questions = ['16', '17', '18']
         self.test_quiz_category = {'type': 'Art', 'id': '2'}
@@ -176,7 +183,30 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Not found')
+
+    # update_question(question_id) test
+    # testing update
+    def test_update_question(self):
+        res = self.client().put('/questions/2', json=self.updated_question)
+        data = json.loads(res.data)
+        question = Question.query.filter(Question.id == 2).one_or_none()
+        
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(question.format()['question'], self.updated_question['question'])
+        self.assertEqual(question.format()['answer'], self.updated_question['answer'])
+        self.assertEqual(question.format()['difficulty'], self.updated_question['difficulty'])
+        self.assertEqual(question.format()['category'], self.updated_question['category'])
     
+    def test_400_question_does_not_exist(self):
+        res = self.client().put('/questions/1000', json=self.updated_question)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Bad request')
+
     # search_question() test
     # search success
     def test_search_question(self):

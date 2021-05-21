@@ -145,7 +145,7 @@ def create_app(test_config=None):
       "categories": paginated_results['paginated_categories'],
       "current_category": 0
     }), 200
-
+      
   '''
   DONE: 
   Create an endpoint to DELETE question using a question ID. 
@@ -211,6 +211,41 @@ def create_app(test_config=None):
     except:
       abort(422)
     
+  # Added a route to update question. It is a PUT as it changes all columns 
+  # If there would be only one column change I'd use PATCH
+  @app.route('/questions/<int:question_id>', methods=['PUT'])
+  def update_question(question_id):
+    body = request.get_json()
+    
+    # if statements are moved to async as if they aren't defined in body,
+    # we will use the ones already set in our db
+    new_question = body.get('question', None)
+    new_answer = body.get('answer', None)
+    new_difficulty = body.get('difficulty', None)
+    new_category = body.get('category', None)
+
+    try:
+      question = Question.query.filter(Question.id == question_id).one_or_none()
+      
+      if question is None:
+        abort(400)
+
+      # Filters out empty inputs and saves only the ones that were filled
+      if new_question:
+        question.question = new_question
+      if new_answer:
+        question.answer = new_answer
+      if new_difficulty:
+        question.difficulty = new_difficulty
+      if new_category:
+        question.category = new_category
+      
+      question.update()
+      return jsonify({'success': True})
+    
+    except:
+      abort(400)
+      
   '''
   DONE: 
   Create a POST endpoint to get questions based on a search term. 
@@ -346,6 +381,14 @@ def create_app(test_config=None):
       "error": 409,
       "message": "Already exists"
     }), 409
+  
+  @app.errorhandler(400)
+  def unprocassable(error):
+    return jsonify({
+      "success": False, 
+      "error": 400,
+      "message": "Bad request"
+    }), 400
 
 
   return app
