@@ -5,11 +5,19 @@
 1. **Python 3.7** - Follow instructions to install the latest version of python for your platform in the [python docs](https://docs.python.org/3/using/unix.html#getting-and-installing-the-latest-version-of-python)
 
 
-2. **Virtual Enviornment** - We recommend working within a virtual environment whenever using Python for projects. This keeps your dependencies for each project separate and organaized. Instructions for setting up a virual enviornment for your platform can be found in the [python docs](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
+2. **Virtual Enviornment** - We recommend working within a virtual environment whenever using Python for projects. 
+
+Enter this commands in terminal to install and start Virtual Enviroment:
+```
+py -3.7 -m venv venv
+venv\Scripts\activate 
+```
+
+This keeps your dependencies for each project separate and organaized. More detailed instructions for setting up a virual enviornment for your platform can be found in the [python docs](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/)
 
 
 3. **PIP Dependencies** - Once you have your virtual environment setup and running, install dependencies by naviging to the `/backend` directory and running:
-```bash
+```
 pip install -r requirements.txt
 ```
 This will install all of the required packages we selected within the `requirements.txt` file.
@@ -24,57 +32,34 @@ This will install all of the required packages we selected within the `requireme
 
 ### Database Setup
 With Postgres running, restore a database using the trivia.psql file provided. From the backend folder in terminal run:
-```bash
-psql trivia < trivia.psql
+```
+psql -U <USERNAME> trivia < trivia.psql
 ```
 
 ### Running the server
 
 From within the `./src` directory first ensure you are working using your created virtual environment.
 
-To run the server, execute:
+Create virtual enviroment variables:
+```
+$env:FLASK_APP = "src/app.py"
+$env:FLASK_ENV = "development"
+$env:DB_USER = "<YOUR DATABASE USERNAME>"
+$env:DB_PASSWORD = "<PASSWORD FOR YOUR DATABASE USER>"
+```
 
-```bash
+To run the server, execute:
+```
 flask run --reload
+```
+If it doesn't work with this command, write:
+```
+python -m flask run --reload
 ```
 
 The `--reload` flag will detect file changes and restart the server automatically.
 
-## ToDo Tasks
-These are the files you'd want to edit in the backend:
-
-1. *./backend/flaskr/`__init__.py`*
-2. *./backend/test_flaskr.py*
-
-
-One note before you delve into your tasks: for each endpoint, you are expected to define the endpoint and response data. The frontend will be a plentiful resource because it is set up to expect certain endpoints and response data formats already. You should feel free to specify endpoints in your own way; if you do so, make sure to update the frontend or you will get some unexpected behavior. 
-
-1. Use Flask-CORS to enable cross-domain requests and set response headers. 
-
-
-2. Create an endpoint to handle GET requests for questions, including pagination (every 10 questions). This endpoint should return a list of questions, number of total questions, current category, categories. 
-
-
-3. Create an endpoint to handle GET requests for all available categories. 
-
-
-4. Create an endpoint to DELETE question using a question ID. 
-
-
-5. Create an endpoint to POST a new question, which will require the question and answer text, category, and difficulty score. 
-
-
-6. Create a POST endpoint to get questions based on category. 
-
-
-7. Create a POST endpoint to get questions based on a search term. It should return any questions for whom the search term is a substring of the question. 
-
-
-8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
-
-
-9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
-
+## 
 
 
 ## Review Comment to the Students
