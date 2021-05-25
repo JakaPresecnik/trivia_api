@@ -99,7 +99,7 @@ def create_app(test_config=None):
 
   # Another route for deleting categories here, not implemented on frontend
   @app.route('/categories/<int:category_id>', methods=['DELETE'])
-  def delete_category():
+  def delete_category(category_id):
     try:
       category = Category.query.filter(Category.id == category_id).one_or_none()
 
@@ -110,7 +110,7 @@ def create_app(test_config=None):
       
       return jsonify({
         "success": True,
-        "question_id": question_id
+        "category_id": category_id
       }), 200
     except:
       abort(422)
@@ -241,7 +241,11 @@ def create_app(test_config=None):
         question.category = new_category
       
       question.update()
-      return jsonify({'success': True})
+      formatted_question = question.format()
+      return jsonify({
+        "success": True,
+        "question": formatted_question
+        })
     
     except:
       abort(400)
@@ -324,6 +328,7 @@ def create_app(test_config=None):
     
     # If/else to set the questions for desired category 
     # or all categories, that are unanswered
+    
     if category['id'] == 0:
       questions = Question.query.filter(Question.id.notin_(previous_questions)).all()
     else:

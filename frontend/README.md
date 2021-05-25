@@ -1,6 +1,6 @@
 # Frontend - Full Stack Trivia API 
 
-### Getting Setup
+## Getting Setup
 
 > _tip_: this frontend is designed to work with [Flask-based Backend](../backend). It is recommended you stand up the backend first, test using Postman or curl, update the endpoints in the frontend, and then the frontend should integrate smoothly.
 
@@ -11,7 +11,7 @@ This project depends on Nodejs and Node Package Manager (NPM). Before continuing
 
 2. **Installing project dependencies**<br>
 This project uses NPM to manage software dependencies. NPM Relies on the package.json file located in the `frontend` directory of this repository. After cloning, open your terminal and run:
-```bash
+```
 npm install
 ```
 >_tip_: **npm i** is shorthand for **npm install**
@@ -24,7 +24,7 @@ The frontend app was built using create-react-app. In order to run the app in de
 
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser. The page will reload if you make edits.<br>
 
-```bash
+```
 npm start
 ```
 
