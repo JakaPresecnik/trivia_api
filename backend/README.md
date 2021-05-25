@@ -68,11 +68,12 @@ $env:DB_USER = "<YOUR DATABASE USERNAME>"
 $env:DB_PASSWORD = "<PASSWORD FOR YOUR DATABASE USER>"
 ```
 **or**
+```
 export FLASK_APP=src/app.py
 export FLASK_ENV=development
 export DB_USER=<YOUR DATABASE USERNAME>
 export DB_PASSWORD=<PASSWORD FOR YOUR DATABASE USER>
-
+```
 To run the server, execute:
 ```
 flask run --reload
